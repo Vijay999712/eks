@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "tf_state" {
-  bucket = "my-unique-terraform-state-bucket-2025"
+  bucket = "vm-state-bucket"
   acl    = "private"
 
   versioning {
