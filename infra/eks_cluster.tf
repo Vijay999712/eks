@@ -69,7 +69,7 @@ data "aws_vpc" "default" {
   default = true
 }
 
-data "aws_subnet_ids" "default" {
+data "aws_subnet" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
@@ -78,7 +78,7 @@ resource "aws_eks_cluster" "eks" {
   role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {
-    subnet_ids = data.aws_subnet_ids.default.ids
+    subnet_ids = data.aws_subnet.default.ids
   }
 
   depends_on = [
@@ -91,7 +91,7 @@ resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.eks.name
   node_group_name = "${var.cluster_name}-node-group"
   node_role_arn   = aws_iam_role.eks_node.arn
-  subnet_ids      = data.aws_subnet_ids.default.ids
+  subnet_ids      = data.aws_subnet.default.ids
 
   scaling_config {
     desired_size = var.desired_capacity
