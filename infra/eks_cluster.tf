@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = ">= 4.0"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.0"   # Add helm provider here if needed
+    }
   }
 }
 
@@ -36,6 +40,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSVPCResourceContr
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
   role       = aws_iam_role.eks_cluster.name
 }
+
 data "aws_eks_cluster" "cluster" {
   name = aws_eks_cluster.eks.name
 }
@@ -44,7 +49,9 @@ data "aws_eks_cluster_auth" "cluster" {
   name = aws_eks_cluster.eks.name
 }
 
+# Helm provider with alias to avoid duplication errors
 provider "helm" {
+  alias = "eks"
   kubernetes {
     host                   = data.aws_eks_cluster.cluster.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
@@ -83,7 +90,6 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
   role       = aws_iam_role.eks_node.name
 }
 
-# Use default VPC and fetch all subnets in it
 data "aws_vpc" "default" {
   default = true
 }
@@ -95,7 +101,6 @@ data "aws_subnets" "default" {
   }
 }
 
-# EKS Cluster
 resource "aws_eks_cluster" "eks" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
@@ -110,7 +115,6 @@ resource "aws_eks_cluster" "eks" {
   ]
 }
 
-# EKS Node Group
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.eks.name
   node_group_name = "${var.cluster_name}-node-group"
@@ -131,3 +135,10 @@ resource "aws_eks_node_group" "node_group" {
     aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy
   ]
 }
+
+# When using helm_release resource, specify provider = helm.eks
+# example:
+# resource "helm_release" "delegate" {
+#   provider = helm.eks
+#   ...
+# }
