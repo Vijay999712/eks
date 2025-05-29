@@ -1,3 +1,8 @@
+resource "kubernetes_namespace" "harness_delegate" {
+  metadata {
+    name = "harness-delegate-ng"
+  }
+}
 module "delegate" {
   source = "harness/harness-delegate/kubernetes"
   version = "0.2.2"
