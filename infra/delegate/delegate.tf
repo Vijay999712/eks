@@ -1,20 +1,10 @@
-resource "kubernetes_namespace" "harness_delegate" {
-  metadata {
-    name = "harness-delegate-ng"
-  }
-}
-module "delegate" {
-  ...
-  depends_on = [kubernetes_namespace.harness_delegate]
-}
-
 module "delegate" {
   source = "harness/harness-delegate/kubernetes"
   version = "0.2.2"
 
   account_id = "ucHySz2jQKKWQweZdXyCog"
   delegate_token = "NTRhYTY0Mjg3NThkNjBiNjMzNzhjOGQyNjEwOTQyZjY="
-  delegate_name = "terraform-delegate"
+  delegate_name = "vm-eks-delegate"
   deploy_mode = "KUBERNETES"
   namespace = "harness-delegate-ng"
   manager_endpoint = "https://app.harness.io"
@@ -23,3 +13,8 @@ module "delegate" {
   upgrader_enabled = true
 }
 
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
+  }
+}
