@@ -13,7 +13,7 @@ module "delegate" {
   upgrader_enabled = true
 }
 
-provider "helm" {
+provider "helm.eks" {
   kubernetes {
     config_path = "~/.kube/config"
   }
