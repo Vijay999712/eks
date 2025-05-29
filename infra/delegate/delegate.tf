@@ -3,7 +3,10 @@ resource "kubernetes_namespace" "harness_delegate" {
     name = "harness-delegate-ng"
   }
 }
-
+module "delegate" {
+  ...
+  depends_on = [kubernetes_namespace.harness_delegate]
+}
 
 module "delegate" {
   source = "harness/harness-delegate/kubernetes"
@@ -20,8 +23,3 @@ module "delegate" {
   upgrader_enabled = true
 }
 
-provider "helm" {
-  kubernetes {
-    config_path = "~/.kube/config"
-  }
-}
